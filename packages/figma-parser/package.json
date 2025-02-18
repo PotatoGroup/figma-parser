@@ -1,0 +1,32 @@
+{
+  "name": "figma-parser",
+  "version": "0.0.1",
+  "description": "figma parser",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "esm/index.d.ts",
+  "scripts": {
+    "dev": "father dev",
+    "build": "father build",
+    "build:deps": "father prebundle",
+    "prepublishOnly": "father doctor && npm run build"
+  },
+  "keywords": [],
+  "authors": [
+    "tangxiaoxin@kuaishou.com"
+  ],
+  "license": "MIT",
+  "files": [
+    "lib",
+    "esm"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "father": "^4.5.3"
+  },
+  "dependencies": {
+    "@figma/rest-api-spec": "^0.23.0"
+  }
+}
