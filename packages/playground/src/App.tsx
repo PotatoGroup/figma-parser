@@ -1,4 +1,4 @@
-import { transformFigmaToHtml } from "figma-parser";
+import { transformFigmaToHtml } from "figma-to-html";
 import "./App.css";
 import { useCallback, useState } from "react";
 
