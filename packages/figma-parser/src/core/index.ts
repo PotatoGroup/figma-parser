@@ -276,8 +276,23 @@ export const generateByUrl = async (url: string) => {
   const rootNode = wrapNode(figmaDocument);
   const images = {};
   const { html, css } = await parseNode(rootNode, images, true, () => {});
-  const styleTag = `<style>${css}</style>`;
   const previewHtml = replaceSrcIdentifiers(html, images, true);
-  console.log(styleTag,previewHtml);
-  return styleTag + previewHtml;
+  return { html: previewHtml, css };
+};
+
+export const transformFigmaToHtml = async (url: string) => {
+  const { html, css } = await generateByUrl(url);
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Figma Designer</title>
+    <style>${css}</style>
+  </head>
+  <body>
+    ${html}
+  </body>
+</html>
+`;
 };

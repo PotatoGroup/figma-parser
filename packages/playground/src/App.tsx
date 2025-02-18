@@ -1,4 +1,4 @@
-import { generateByUrl } from "figma-parser";
+import { transformFigmaToHtml } from "figma-parser";
 import "./App.css";
 import { useCallback, useState } from "react";
 
@@ -9,7 +9,7 @@ function App() {
     if (!address) {
       return;
     }
-    generateByUrl(address).then((res) => {
+    transformFigmaToHtml(address).then((res) => {
       setResult(res);
     });
   }, [address]);

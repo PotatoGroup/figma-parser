@@ -9,7 +9,7 @@ npm install figma-parser
 
 ## Usage
 ```ts
-import { generateByUrl } from 'figma-parser'
-const htmlText = await generateByUrl(url)
+import { generateByUrl, transformFigmaToHtml } from 'figma-parser'
+const htmlText = await transformFigmaToHtml(url)
 ```
 详细参考playground

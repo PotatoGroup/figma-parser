@@ -19,13 +19,13 @@ interface ShadowStyles {
   shadowDetail?: ShadowDetail
 }
 
-export function parseShadowStyle(node: SceneNode): ShadowStyles {
+export function parseShadowStyle(node: any): ShadowStyles {
   if (!('effects' in node) || node.effects.length === 0 || !node.visible)
     return {}
 
   const effect = node.effects.find(
-    e => e.type === 'DROP_SHADOW' && e.visible,
-  ) as DropShadowEffect
+    (e: any) => e.type === 'DROP_SHADOW' && e.visible,
+  )
   if (!effect) return {}
 
   const { r, g, b, a } = effect.color
