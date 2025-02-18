@@ -56,7 +56,7 @@ export const parseToPNG = async (
   return { html, css };
 };
 
-// 递归检查节点及其子节点是否包含文字节点和图片节点
+// 判断是否需要导出为PNG
 export const shouldExportToPNG = (node: FigmaNode): boolean => {
   let hasImageFill = false;
 

@@ -31,7 +31,7 @@ export const parseBooleanOperationNode = async (
   images[imageName] = base64;
   const srcIdentifier = `__SRC__${imageName}__`;
 
-  // 设置样式
+  // Add styles for the container and image
   const containerStyles = Object.assign(
     {},
     commonStyles(

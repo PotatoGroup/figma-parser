@@ -12,14 +12,13 @@ import { parseToSVG, shouldExportToSVG } from "./parseToSVG";
 import { parseVectorNode } from "./parseVectorNode";
 
 let _onProgress = () => {};
-// 解析节点并生成 HTML
 export const parseNode = async (
   node: FigmaNode,
   images: { [key: string]: string } = {},
   isTopLevel = false,
   onProgress?: () => void
 ): Promise<{ html: string; css: string }> => {
-  // 统一在入口处判断节点可见性
+  // check if node is visible
   if (!node.visible) {
     return { html: "", css: "" };
   }
@@ -28,12 +27,10 @@ export const parseNode = async (
 
   _onProgress?.();
 
-  // 如果当前节点和所有子孙节点都没有文字节点和图片节点，则直接使用 parseToSvg 解析
   if (shouldExportToSVG(node)) {
     return parseToSVG(node, images, isTopLevel);
   }
 
-  // 如果当前节点和所有子孙节点都没有文字节点，但是有图片节点，则直接使用 parseToPng 解析
   if (shouldExportToPNG(node)) {
     return parseToPNG(node, images, isTopLevel);
   }
