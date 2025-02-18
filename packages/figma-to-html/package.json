@@ -1,6 +1,6 @@
 {
   "name": "figma-to-html",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "figma parser",
   "main": "lib/index.js",
   "module": "esm/index.js",

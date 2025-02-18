@@ -19,7 +19,7 @@ export const request = async (url: string, options?: RequestInit) => {
   if (response.status === 404) {
     history.pushState(null, "", location.origin);
     checkAuthorize();
-    throw new Error("no access permission");
+    throw new Error("No access permission");
   }
   return response;
 };
