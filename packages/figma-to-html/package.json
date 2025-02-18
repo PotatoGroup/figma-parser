@@ -1,6 +1,6 @@
 {
   "name": "figma-to-html",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "figma parser",
   "main": "lib/index.js",
   "module": "esm/index.js",
@@ -11,7 +11,7 @@
     "build:deps": "father prebundle",
     "prepublishOnly": "father doctor && npm run build"
   },
-  "keywords": [],
+  "keywords": ["figma", "figma-to-html"],
   "authors": [
     "tangxiaoxin"
   ],

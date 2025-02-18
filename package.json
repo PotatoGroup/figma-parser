@@ -1,6 +1,7 @@
 {
   "name": "figma-parser-project",
   "version": "1.0.0",
+  "private": true,
   "description": "figma parser",
   "main": "index.js",
   "scripts": {
