@@ -1,0 +1,26 @@
+{
+  "name": "figma-parser-project",
+  "version": "1.0.0",
+  "description": "figma parser",
+  "main": "index.js",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build:graph": "turbo run build --graph=graph.png",
+    "build": "turbo run build",
+    "clean": "turbo run clean"
+  },
+  "keywords": ["figma", "parser"],
+  "author": "tangxiaoxin",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "turbo": "^2.4.1",
+    "typescript": "^5.7.3",
+    "father": "^4.5.3"
+  },
+  "engines": {
+    "node": ">=16",
+    "pnpm": ">=8"
+  },
+  "packageManager": "pnpm@8.11.0"
+}
