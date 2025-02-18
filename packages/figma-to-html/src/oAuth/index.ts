@@ -14,6 +14,8 @@ const getCredentials = () => btoa(`${ClientId}:${ClientSecret}`);
 
 export function oauthFigma() {
   const state = uuid();
+  sessionStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
   sessionStorage.setItem("oauth_state", state);
   const authUrl = `https://www.figma.com/oauth?client_id=${ClientId}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&state=${state}&response_type=code`;
   window.location.href = authUrl;
@@ -34,11 +36,11 @@ export async function exchangeCodeForToken(code: string) {
     }).toString(),
   });
   const data = await response.json();
-  sessionStorage.setItem("figma_token", data.access_token);
+  sessionStorage.setItem("access_token", data.access_token);
 }
 
 export async function refreshToken() {
-  const refreshToken = sessionStorage.getItem("figma_refresh_token") as string;
+  const refreshToken = localStorage.getItem("refresh_token") as string;
   const credentials = getCredentials();
   const response = await fetch(REFRESH_TOKEN_URL, {
     method: "POST",
@@ -56,8 +58,10 @@ export async function refreshToken() {
     throw new Error(data.message || "刷新 token 失败");
   }
   if (data.access_token) {
-    sessionStorage.setItem("figma_token", data.access_token);
-    sessionStorage.setItem("figma_refresh_token", data.refresh_token);
+    sessionStorage.setItem("access_token", data.access_token);
+  }
+  if (data.refresh_token) {
+    localStorage.setItem("refresh_token", data.refresh_token);
   }
 }
 
@@ -69,7 +73,7 @@ export const checkAuthorize = async () => {
   if (!code || state !== lastState) {
     return oauthFigma();
   }
-  const token = sessionStorage.getItem("figma_token");
+  const token = sessionStorage.getItem("access_token");
   if (!token) {
     await exchangeCodeForToken(code);
   }
