@@ -12,10 +12,6 @@ export const getFigmaNodes = async ({
   const response = await request(
     `${BaseUrl}/files/${fileKey}/nodes?ids=${nodeId}&geometry=paths`
   );
-  if (response.status === 404) {
-    
-    throw new Error("Not Found");
-  }
   return response.json();
 };
 

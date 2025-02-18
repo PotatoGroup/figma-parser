@@ -16,5 +16,8 @@ export const request = async (url: string, options?: RequestInit) => {
     await refreshToken();
     response = await doFetch();
   }
+  if (response.status === 404) {
+    throw new Error("Not Found");
+  }
   return response;
 };
