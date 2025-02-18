@@ -6,17 +6,40 @@ import {
   REFRESH_TOKEN_URL,
   TOKEN_URL,
 } from "./const";
+
+type FigmaToken = {
+  access_token: string;
+  refresh_token: string;
+  code: string;
+  state: string;
+};
+
 export function uuid() {
   return (Math.random() * 100000 * Date.now()).toString(36);
 }
 
 const getCredentials = () => btoa(`${ClientId}:${ClientSecret}`);
 
+export const getToken = () => {
+  const token = sessionStorage.getItem("token");
+  if (token) {
+    return JSON.parse(token);
+  }
+  return {};
+};
+
+const setToken = (values: Partial<FigmaToken>) => {
+  const token = getToken();
+  sessionStorage.setItem("token", JSON.stringify(Object.assign(token, values)));
+};
+
+const cleanToken = () => {
+  sessionStorage.removeItem("token");
+};
+
 export function oauthFigma() {
   const state = uuid();
-  sessionStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  sessionStorage.setItem("oauth_state", state);
+  setToken({ state });
   const authUrl = `https://www.figma.com/oauth?client_id=${ClientId}&redirect_uri=${REDIRECT_URI}&scope=${SCOPE}&state=${state}&response_type=code`;
   window.location.href = authUrl;
 }
@@ -36,11 +59,14 @@ export async function exchangeCodeForToken(code: string) {
     }).toString(),
   });
   const data = await response.json();
-  sessionStorage.setItem("access_token", data.access_token);
+  setToken({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+  });
 }
 
 export async function refreshToken() {
-  const refreshToken = localStorage.getItem("refresh_token") as string;
+  const refreshToken = getToken().refresh_token;
   const credentials = getCredentials();
   const response = await fetch(REFRESH_TOKEN_URL, {
     method: "POST",
@@ -57,24 +83,27 @@ export async function refreshToken() {
   if (data.error) {
     throw new Error(data.message || "刷新 token 失败");
   }
-  if (data.access_token) {
-    sessionStorage.setItem("access_token", data.access_token);
-  }
-  if (data.refresh_token) {
-    localStorage.setItem("refresh_token", data.refresh_token);
-  }
+  setToken({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+  });
 }
 
 export const checkAuthorize = async () => {
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  const lastState = sessionStorage.getItem("oauth_state");
+  const { state: lastState, token } = getToken();
   if (!code || state !== lastState) {
     return oauthFigma();
   }
-  const token = sessionStorage.getItem("access_token");
   if (!token) {
     await exchangeCodeForToken(code);
   }
+};
+
+export const reauth = () => {
+  history.pushState(null, "", location.origin);
+  cleanToken();
+  checkAuthorize();
 };

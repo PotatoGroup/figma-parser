@@ -11,6 +11,7 @@ import { parseToPNG, shouldExportToPNG } from "./parseToPNG";
 import { parseToSVG, shouldExportToSVG } from "./parseToSVG";
 import { parseVectorNode } from "./parseVectorNode";
 
+let _onProgress = () => {};
 // 解析节点并生成 HTML
 export const parseNode = async (
   node: FigmaNode,
@@ -23,7 +24,9 @@ export const parseNode = async (
     return { html: "", css: "" };
   }
 
-  onProgress?.();
+  if (onProgress) _onProgress = onProgress;
+
+  _onProgress?.();
 
   // 如果当前节点和所有子孙节点都没有文字节点和图片节点，则直接使用 parseToSvg 解析
   if (shouldExportToSVG(node)) {
@@ -57,4 +60,20 @@ export const parseNode = async (
     default:
       return { html: "", css: "" };
   }
+};
+
+export const calculateNodeNumber = (node: FigmaNode): number => {
+  if (node.visible === false) return 0;
+  if (
+    !node.children ||
+    node.children.length === 0 ||
+    shouldExportToSVG(node) ||
+    shouldExportToPNG(node)
+  ) {
+    return 1;
+  }
+  return node.children.reduce(
+    (count: number, child: FigmaNode) => count + calculateNodeNumber(child),
+    1
+  );
 };

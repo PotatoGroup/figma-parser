@@ -1,12 +1,12 @@
-import { checkAuthorize, refreshToken } from "@/oAuth";
+import { refreshToken, reauth, getToken } from "@/oAuth";
 export const request = async (url: string, options?: RequestInit) => {
   const { headers, ...rest } = options ?? {};
   const doFetch = async () => {
-    const token = sessionStorage.getItem("access_token");
+    const access_token = getToken().access_token;
     return fetch(url, {
       headers: {
         ...headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${access_token}`,
       },
       ...rest,
     });
@@ -17,8 +17,7 @@ export const request = async (url: string, options?: RequestInit) => {
     response = await doFetch();
   }
   if (response.status === 404) {
-    history.pushState(null, "", location.origin);
-    checkAuthorize();
+    reauth();
     throw new Error("No access permission");
   }
   return response;

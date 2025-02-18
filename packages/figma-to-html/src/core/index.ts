@@ -1,7 +1,7 @@
 import { SingleFigmaCore } from "./core";
 import { FigmaNode } from "@/types";
 import type { Node, TypeStyle } from "@figma/rest-api-spec";
-import { parseNode } from "@/core/node-parser";
+import { calculateNodeNumber, parseNode } from "@/core/node-parser";
 
 export function wrapNode(nodeData: Node): FigmaNode {
   const privateFills = (nodeData as FigmaNode).fills;
@@ -268,20 +268,31 @@ function replaceSrcIdentifiers(
   });
 }
 
-export const generateByUrl = async (url: string) => {
+export const generateByUrl = async (
+  url: string,
+  onProgress?: (progress: number) => void
+) => {
   const figmaCore = new SingleFigmaCore();
   figmaCore.setUrl(url);
   const figmaData = await figmaCore.getFigmaNodes();
   const figmaDocument = Object.values(figmaData.nodes)[0].document;
   const rootNode = wrapNode(figmaDocument);
   const images = {};
-  const { html, css } = await parseNode(rootNode, images, true);
+  const totalNodes = calculateNodeNumber(rootNode);
+  let count = 0;
+  const { html, css } = await parseNode(rootNode, images, true, () => {
+    count++;
+    onProgress?.(count / totalNodes);
+  });
   const previewHtml = replaceSrcIdentifiers(html, images, true);
   return { html: previewHtml, css };
 };
 
-export const transformFigmaToHtml = async (url: string) => {
-  const { html, css } = await generateByUrl(url);
+export const transformFigmaToHtml = async (
+  url: string,
+  onProgress?: (progress: number) => void
+) => {
+  const { html, css } = await generateByUrl(url, onProgress);
   return `<!doctype html>
 <html lang="en">
   <head>

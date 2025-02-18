@@ -9,7 +9,9 @@ function App() {
     if (!address) {
       return;
     }
-    transformFigmaToHtml(address).then((res) => {
+    transformFigmaToHtml(address, (process: number) => {
+      console.log(process);
+    }).then((res) => {
       setResult(res);
     });
   }, [address]);
