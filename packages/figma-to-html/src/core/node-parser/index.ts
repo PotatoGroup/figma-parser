@@ -11,23 +11,19 @@ import { parseToPNG, shouldExportToPNG } from "./parseToPNG";
 import { parseToSVG, shouldExportToSVG } from "./parseToSVG";
 import { parseVectorNode } from "./parseVectorNode";
 
-let _updateProgress: () => void;
 // 解析节点并生成 HTML
 export const parseNode = async (
   node: FigmaNode,
   images: { [key: string]: string } = {},
   isTopLevel = false,
-  updateProgress?: () => void
+  onProgress?: () => void
 ): Promise<{ html: string; css: string }> => {
   // 统一在入口处判断节点可见性
   if (!node.visible) {
     return { html: "", css: "" };
   }
 
-  if (updateProgress) {
-    _updateProgress = updateProgress;
-  }
-  _updateProgress();
+  onProgress?.();
 
   // 如果当前节点和所有子孙节点都没有文字节点和图片节点，则直接使用 parseToSvg 解析
   if (shouldExportToSVG(node)) {

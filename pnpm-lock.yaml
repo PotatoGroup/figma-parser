@@ -21,7 +21,7 @@ importers:
         specifier: ^5.7.3
         version: 5.7.3
 
-  packages/figma-parser:
+  packages/figma-to-html:
     dependencies:
       '@figma/rest-api-spec':
         specifier: ^0.23.0
@@ -38,7 +38,7 @@ importers:
         version: 5.24.0(react-dom@19.0.0)(react@19.0.0)
       figma-to-html:
         specifier: workspace:^
-        version: link:../figma-parser
+        version: link:../figma-to-html
       react:
         specifier: ^19.0.0
         version: 19.0.0

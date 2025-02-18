@@ -275,7 +275,7 @@ export const generateByUrl = async (url: string) => {
   const figmaDocument = Object.values(figmaData.nodes)[0].document;
   const rootNode = wrapNode(figmaDocument);
   const images = {};
-  const { html, css } = await parseNode(rootNode, images, true, () => {});
+  const { html, css } = await parseNode(rootNode, images, true);
   const previewHtml = replaceSrcIdentifiers(html, images, true);
   return { html: previewHtml, css };
 };

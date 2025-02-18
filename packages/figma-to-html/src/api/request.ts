@@ -17,7 +17,7 @@ export const request = async (url: string, options?: RequestInit) => {
     response = await doFetch();
   }
   if (response.status === 404) {
-    throw new Error("Not Found");
+    throw new Error("no access permission");
   }
   return response;
 };
