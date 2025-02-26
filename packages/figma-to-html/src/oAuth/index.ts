@@ -66,7 +66,7 @@ export async function exchangeCodeForToken(code: string) {
 }
 
 export async function refreshToken() {
-  const refreshToken = getToken().refresh_token;
+  const refresh_token = getToken().refresh_token;
   const credentials = getCredentials();
   const response = await fetch(REFRESH_TOKEN_URL, {
     method: "POST",
@@ -75,7 +75,7 @@ export async function refreshToken() {
       Authorization: `Basic ${credentials}`,
     },
     body: new URLSearchParams({
-      ["refresh_token"]: refreshToken,
+      ["refresh_token"]: refresh_token,
     }).toString(),
   });
 
@@ -93,11 +93,11 @@ export const checkAuthorize = async () => {
   const url = new URL(window.location.href);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  const { state: lastState, token } = getToken();
+  const { state: lastState, access_token } = getToken();
   if (!code || state !== lastState) {
     return oauthFigma();
   }
-  if (!token) {
+  if (!access_token) {
     await exchangeCodeForToken(code);
   }
 };

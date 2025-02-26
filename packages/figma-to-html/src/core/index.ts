@@ -2,6 +2,7 @@ import { SingleFigmaCore } from "./core";
 import { FigmaNode } from "@/types";
 import type { Node, TypeStyle } from "@figma/rest-api-spec";
 import { calculateNodeNumber, parseNode } from "@/core/node-parser";
+import { checkAuthorize } from "@/oAuth";
 
 export function wrapNode(nodeData: Node): FigmaNode {
   const privateFills = (nodeData as FigmaNode).fills;
@@ -268,31 +269,7 @@ function replaceSrcIdentifiers(
   });
 }
 
-export const generateByUrl = async (
-  url: string,
-  onProgress?: (progress: number) => void
-) => {
-  const figmaCore = new SingleFigmaCore();
-  figmaCore.setUrl(url);
-  const figmaData = await figmaCore.getFigmaNodes();
-  const figmaDocument = Object.values(figmaData.nodes)[0].document;
-  const rootNode = wrapNode(figmaDocument);
-  const images = {};
-  const totalNodes = calculateNodeNumber(rootNode);
-  let count = 0;
-  const { html, css } = await parseNode(rootNode, images, true, () => {
-    count++;
-    onProgress?.(count / totalNodes);
-  });
-  const previewHtml = replaceSrcIdentifiers(html, images, true);
-  return { html: previewHtml, css };
-};
-
-export const transformFigmaToHtml = async (
-  url: string,
-  onProgress?: (progress: number) => void
-) => {
-  const { html, css } = await generateByUrl(url, onProgress);
+function htmlTemplate(html: string, css: string) {
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -306,4 +283,50 @@ export const transformFigmaToHtml = async (
   </body>
 </html>
 `;
+}
+
+let totalNodes = 0;
+let count = 0;
+
+const generateByUrl = async (
+  url: string,
+  onProgress?: (progress: number) => void
+) => {
+  const figmaCore = new SingleFigmaCore();
+  figmaCore.setUrl(url);
+  const figmaData = await figmaCore.getFigmaNodes();
+  const figmaDocument = Object.values(figmaData.nodes)[0].document;
+  const rootNode = wrapNode(figmaDocument);
+  const images = {};
+  totalNodes += calculateNodeNumber(rootNode);
+  const { html, css } = await parseNode(rootNode, images, true, () => {
+    count++;
+    onProgress?.(count / totalNodes);
+  });
+  const previewHtml = replaceSrcIdentifiers(html, images, true);
+  return { html: previewHtml, css };
+};
+
+export const transformFigmaToHtml = async (
+  url: string,
+  onProgress?: (progress: number) => void
+) => {
+  totalNodes = 0;
+  count = 0;
+  await checkAuthorize();
+  const { html, css } = await generateByUrl(url, onProgress);
+  return htmlTemplate(html, css);
+};
+
+export const transformFigmaToHtmlBatch = async (
+  urls: string[],
+  onProgress?: (progress: number) => void
+) => {
+  totalNodes = 0;
+  count = 0;
+  await checkAuthorize();
+  const result = await Promise.all(
+    urls.map((url) => generateByUrl(url, onProgress))
+  );
+  return result.map(({ html, css }) => htmlTemplate(html, css));
 };

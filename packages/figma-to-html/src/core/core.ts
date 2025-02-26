@@ -1,6 +1,5 @@
 import { singleton } from "./utils";
 import { getFigmaNodes, getFigmaImages, getBase64ByImageRef } from "@/api";
-import { checkAuthorize } from "@/oAuth";
 import type { GetFileNodesResponse } from '@figma/rest-api-spec'
 
 class FigmaCore {
@@ -18,7 +17,6 @@ class FigmaCore {
     this.nodeId = nodeId;
   }
   public async getFigmaNodes(): Promise<GetFileNodesResponse> {
-    await checkAuthorize();
     const response = await getFigmaNodes({
       fileKey: this.fileKey,
       nodeId: this.nodeId,

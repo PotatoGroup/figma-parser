@@ -11,10 +11,11 @@ $ pnpm install figma-to-html
 
 ## Usage
 ```ts
-import { generateByUrl, transformFigmaToHtml } from 'figma-to-html'
+import { transformFigmaToHtml, transformFigmaToHtmlBatch } from 'figma-to-html'
 //参数：figma url
 const htmlText = await transformFigmaToHtml(url)
-//ps：generateByUrl产出html和css内容
+//批量转换，参数：figma url数组
+const htmlText = await transformFigmaToHtmlBatch(urls)
 ```
 
 ## LICENSE
