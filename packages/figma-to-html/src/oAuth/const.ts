@@ -7,4 +7,4 @@ export const ClientSecret = "OiGpuQXKIcm9OOHXE1BlzujTxUPER1";
 
 export const SCOPE = "files:read";
 
-export const REDIRECT_URI = location.origin;
+export const REDIRECT_URI = location.origin + location.pathname;
