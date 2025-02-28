@@ -10,13 +10,44 @@ $ pnpm install figma-to-html
 ```
 
 ## Usage
+
 ```ts
-import { transformFigmaToHtml, transformFigmaToHtmlBatch } from 'figma-to-html'
-//参数：figma url
-const htmlText = await transformFigmaToHtml(url)
-//批量转换，参数：figma url数组
-const htmlText = await transformFigmaToHtmlBatch(urls)
+import { FigmaParser } from "figma-to-html";
+const figmaParser = new FigmaParser({
+  clientId: "clientId",
+  clientSecret: "clientSecret",
+  redirectUri: "redirectUri",
+});
+
+//single：figma url
+figmaParser
+  .parse(url, { onProgress: (progress) => {} })
+  .then((htmlText) => {
+    console.log(htmlText);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+
+//batch：figma url array
+figmaParser
+  .parseBatch(urls, { onProgress: (progress) => {} })
+  .then((htmlText) => {
+    console.log(htmlText);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 ```
+
+## Options
+
+| Option       | Type                         | Default                             | Required | Description        |
+| ------------ | ---------------------------- | ----------------------------------- | -------- | ------------------ |
+| clientId     | `string`                     | -                                   | ✅       | figma clientId     |
+| clientSecret | `string`                     | -                                   | ✅       | figma clientSecret |
+| redirectUri  | `string`                     | location.origin + location.pathname |          | figma redirectUri  |
+| onProgress   | `(progress: number) => void` | -                                   |          | progress callback  |
 
 ## LICENSE
 

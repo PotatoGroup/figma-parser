@@ -1,5 +1,5 @@
 import type { RectangleNode } from "@figma/rest-api-spec";
-import { SingleFigmaCore } from "@/core/core";
+import { FigmaParser } from "@/core";
 import type { IExtendedFigmaNode } from "@/types";
 import {
   colorToCss,
@@ -15,7 +15,7 @@ export const parseRectangleNode = async (
   images: { [key: string]: string },
   isTopLevel = false
 ): Promise<{ html: string; css: string }> => {
-  const figmaCore = new SingleFigmaCore();
+  const figmaParser = new FigmaParser();
   const containerClassName = generateClassName("rectangle");
   const { name } = node;
 
@@ -33,7 +33,7 @@ export const parseRectangleNode = async (
     if (fill.type === "SOLID") {
       containerStyles["background-color"] = colorToCss(fill.color);
     } else if (fill.type === "IMAGE") {
-      const base64 = await figmaCore.getBase64ByImageRef(fill.imageRef);
+      const base64 = await figmaParser.getBase64ByImageRef(fill.imageRef);
       const imageName = `${sanitizeName(name)}_${uuid()}.png`;
       images[imageName] = base64;
       const srcIdentifier = `__SRC__${imageName}__`;

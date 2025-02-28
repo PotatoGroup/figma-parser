@@ -1,4 +1,4 @@
-import { SingleFigmaCore } from "@/core/core";
+import { FigmaParser } from "@/core";
 import type { FigmaNode } from "@/types";
 import {
   commonStyles,
@@ -16,8 +16,8 @@ export const parseToSVG = async (
   images: { [key: string]: string },
   isTopLevel = false
 ): Promise<{ html: string; css: string }> => {
-  const figmaCore = new SingleFigmaCore();
-  const base64 = await figmaCore.transformNodeToBase64(node.id, "svg");
+  const figmaParser = new FigmaParser();
+  const base64 = await figmaParser.transformNodeToBase64(node.id, "svg");
   if (!base64) return { html: "", css: "" };
 
   const imageClassName = generateClassName("svg-img");

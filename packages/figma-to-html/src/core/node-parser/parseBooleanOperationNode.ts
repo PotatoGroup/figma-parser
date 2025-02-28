@@ -1,5 +1,5 @@
 import type { BooleanOperationNode } from "@figma/rest-api-spec";
-import { SingleFigmaCore } from "@/core/core";
+import { FigmaParser } from "@/core";
 import type { IExtendedFigmaNode } from "@/types";
 import {
   commonStyles,
@@ -14,14 +14,14 @@ export const parseBooleanOperationNode = async (
   images: { [key: string]: string } = {},
   isTopLevel = false
 ): Promise<{ html: string; css: string }> => {
-  const figmaCore = new SingleFigmaCore();
+  const figmaParser = new FigmaParser();
   const containerClassName = generateClassName("boolean-operation");
   const imageClassName = generateClassName("boolean-operation-img");
   const { name } = node;
 
   let base64;
   try {
-    base64 = await figmaCore.transformNodeToBase64(node.id, "svg");
+    base64 = await figmaParser.transformNodeToBase64(node.id, "svg");
   } catch (error) {
     return { html: "", css: "" };
   }
