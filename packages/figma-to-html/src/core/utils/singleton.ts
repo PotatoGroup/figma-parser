@@ -1,6 +1,6 @@
-export type Constructor<T = any> = new (...args: any[]) => T;
+export type Constructor<T> = new (...args: any[]) => T;
 
-export type InstanceType<T extends Constructor> = T extends new (...args: any[]) => infer R ? R : never;
+export type InstanceType<T extends Constructor<any>> = T extends new (...args: any[]) => infer R ? R : never;
 
 export const singleton = <T extends Object>(
   className: Constructor<T>

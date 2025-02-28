@@ -64,7 +64,7 @@ class FigmaCore {
     this.total += calculateNodeNumber(rootNode);
     const { html, css } = await parseNode(rootNode, images, true, () => {
       this.current++;
-      options?.onProgress?.(this.current / this.current);
+      options?.onProgress?.(Math.floor((this.current / this.total) * 100));
     });
     const previewHtml = replaceSrcIdentifiers(html, images, true);
     return { html: previewHtml, css };
