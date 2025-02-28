@@ -20,26 +20,35 @@ const pickParams = (url: string) => {
   };
 };
 
-export type FigmaParserOptions = FigmaAuthOptions;
+export type FigmaParserOptions = FigmaAuthOptions & { tpl?: boolean };
 
 export type ParseOptions = Partial<{
   onProgress: (progress: number) => void;
 }>;
 
 class FigmaCore {
+  private auth!: InstanceType<typeof SingleFigmaAuth>;
   private fileKey!: string;
   private nodeId!: string;
-  private auth!: InstanceType<typeof SingleFigmaAuth>;
+  private options!: FigmaParserOptions;
   private total!: number;
   private current!: number;
+
   constructor(options?: FigmaParserOptions) {
     this.auth = new SingleFigmaAuth(options);
+    this.options = Object.assign({ tpl: true }, options);
   }
   public async parse(url: string, options?: ParseOptions) {
     await this.auth.checkAuthorize();
     this.resetProgress();
     const { html, css } = await this.transform(url, options);
-    return htmlTemplate(html, css);
+    if (this.options.tpl) {
+      return htmlTemplate(html, css);
+    }
+    return {
+      html,
+      css,
+    };
   }
   public async parseBatch(urls: string[], options?: ParseOptions) {
     await this.auth.checkAuthorize();
@@ -47,7 +56,9 @@ class FigmaCore {
     const result = await Promise.all(
       urls.map((url) => this.transform(url, options))
     );
-    return result.map(({ html, css }) => htmlTemplate(html, css));
+    return result.map(({ html, css }) =>
+      this.options.tpl ? htmlTemplate(html, css) : ({ html, css })
+    );
   }
 
   private async transform(url: string, options?: ParseOptions) {
