@@ -1,332 +1,118 @@
-import { SingleFigmaCore } from "./core";
-import { FigmaNode } from "@/types";
-import type { Node, TypeStyle } from "@figma/rest-api-spec";
 import { calculateNodeNumber, parseNode } from "@/core/node-parser";
-import { checkAuthorize } from "@/oAuth";
+import {
+  singleton,
+  InstanceType,
+  wrapNode,
+  replaceSrcIdentifiers,
+  htmlTemplate,
+} from "./utils";
+import { getFigmaNodes, getFigmaImages, getBase64ByImageRef } from "@/api";
+import type { GetFileNodesResponse } from "@figma/rest-api-spec";
+import { SingleFigmaAuth, type FigmaAuthOptions } from "@/oAuth";
 
-export function wrapNode(nodeData: Node): FigmaNode {
-  const privateFills = (nodeData as FigmaNode).fills;
-  const privateStrokes = (nodeData as FigmaNode).strokes;
-  const privateVisible = (nodeData as FigmaNode).visible;
-  const extendedNode = Object.defineProperties(nodeData, {
-    getStyledTextSegments: {
-      value: function (styleTypes: (keyof TypeStyle)[]) {
-        if (
-          !("characterStyleOverrides" in this) ||
-          !("styleOverrideTable" in this) ||
-          this.characterStyleOverrides.length === 0
-        ) {
-          const defaultStyles = styleTypes.reduce((acc, type) => {
-            acc[type] = this.style[type] || this[type];
-            return acc;
-          }, {} as TypeStyle);
-          return [defaultStyles];
-        }
+const pickParams = (url: string) => {
+  const urlObject = new URL(url);
+  const fileKey = urlObject.pathname.split("/")[2];
+  const nodeId = urlObject.searchParams.get("node-id") as string;
+  return {
+    fileKey,
+    nodeId,
+  };
+};
 
-        const textContent = this.characters || "";
-        const segments = [];
-        let currentSegment = { start: 0, end: 0, styles: {} };
+export type FigmaParserOptions = FigmaAuthOptions;
 
-        for (let i = 0; i < this.characterStyleOverrides.length; i++) {
-          const styleIndex = this.characterStyleOverrides[i];
-          const charStyle = this.styleOverrideTable[styleIndex] || {};
+export type ParseOptions = Partial<{
+  onProgress: (progress: number) => void;
+}>;
 
-          const styles = styleTypes.reduce((acc, type) => {
-            if (charStyle[type] !== undefined && charStyle[type] !== null) {
-              acc[type] = charStyle[type];
-            } else {
-              acc[type] = this.style[type] || this[type];
-            }
-            return acc;
-          }, {} as TypeStyle);
-
-          if (i === 0) {
-            currentSegment.styles = styles;
-          }
-
-          if (
-            JSON.stringify(currentSegment.styles) !== JSON.stringify(styles)
-          ) {
-            currentSegment.end = i;
-            segments.push({ ...currentSegment });
-            currentSegment = { start: i, end: i, styles };
-          }
-
-          currentSegment.end = i + 1;
-        }
-
-        segments.push(currentSegment);
-        return segments.map(({ start, end, styles }) => {
-          return {
-            characters: textContent.substring(start, end),
-            start,
-            end,
-            ...styles,
-          };
-        });
-      },
-    },
-    marginTop: {
-      get(this: FigmaNode) {
-        if (
-          this.parent &&
-          "absoluteBoundingBox" in this &&
-          "absoluteBoundingBox" in this.parent &&
-          this.absoluteBoundingBox &&
-          this.parent.absoluteBoundingBox
-        ) {
-          return this.absoluteBoundingBox.y - this.parent.absoluteBoundingBox.y;
-        }
-        return 0;
-      },
-    },
-    marginRight: {
-      get(this: FigmaNode) {
-        if (
-          this.parent &&
-          "absoluteBoundingBox" in this &&
-          "absoluteBoundingBox" in this.parent &&
-          this.absoluteBoundingBox &&
-          this.parent.absoluteBoundingBox
-        ) {
-          const parentRight =
-            this.parent.absoluteBoundingBox.x +
-            this.parent.absoluteBoundingBox.width;
-          const nodeRight =
-            this.absoluteBoundingBox.x + this.absoluteBoundingBox.width;
-          return parentRight - nodeRight;
-        }
-        return 0;
-      },
-    },
-    marginBottom: {
-      get(this: FigmaNode) {
-        if (
-          this.parent &&
-          "absoluteBoundingBox" in this &&
-          "absoluteBoundingBox" in this.parent &&
-          this.absoluteBoundingBox &&
-          this.parent.absoluteBoundingBox
-        ) {
-          const parentBottom =
-            this.parent.absoluteBoundingBox.y +
-            this.parent.absoluteBoundingBox.height;
-          const nodeBottom =
-            this.absoluteBoundingBox.y + this.absoluteBoundingBox.height;
-          return parentBottom - nodeBottom;
-        }
-        return 0;
-      },
-    },
-    marginLeft: {
-      get(this: FigmaNode) {
-        if (
-          this.parent &&
-          "absoluteBoundingBox" in this &&
-          "absoluteBoundingBox" in this.parent &&
-          this.absoluteBoundingBox &&
-          this.parent.absoluteBoundingBox
-        ) {
-          return this.absoluteBoundingBox.x - this.parent.absoluteBoundingBox.x;
-        }
-        return 0;
-      },
-    },
-    textAlignHorizontal: {
-      get(this: FigmaNode) {
-        if ("constraints" in this && this.constraints?.horizontal) {
-          return this.constraints.horizontal;
-        }
-        return "LEFT";
-      },
-    },
-    textAlignVertical: {
-      get(this: FigmaNode) {
-        if ("constraints" in this && this.constraints?.vertical) {
-          return this.constraints.vertical;
-        }
-        return "TOP";
-      },
-    },
-    fills: {
-      get(this: FigmaNode) {
-        if (!privateFills) {
-          return [];
-        }
-        return privateFills.map((fill) => ({
-          ...fill,
-          ...(fill.type === "GRADIENT_LINEAR"
-            ? {
-                gradientTransform: calculateGradientTransform(
-                  fill.gradientHandlePositions
-                ),
-              }
-            : {}),
-        }));
-      },
-    },
-    strokes: {
-      get(this: FigmaNode) {
-        if (!privateStrokes) {
-          return [];
-        }
-        return privateStrokes.map((stroke) => ({
-          ...stroke,
-          ...(stroke.type === "GRADIENT_LINEAR"
-            ? {
-                gradientTransform: calculateGradientTransform(
-                  stroke.gradientHandlePositions
-                ),
-              }
-            : {}),
-        }));
-      },
-    },
-    width: {
-      get() {
-        return this.absoluteBoundingBox?.width ?? 0;
-      },
-    },
-    height: {
-      get() {
-        return this.absoluteBoundingBox?.height ?? 0;
-      },
-    },
-    visible: {
-      get() {
-        return privateVisible ?? true;
-      },
-    },
-    topLeftRadius: {
-      get(this: FigmaNode) {
-        if ("rectangleCornerRadii" in this) {
-          return this.rectangleCornerRadii?.[0] ?? 0;
-        }
-        return "cornerRadius" in this ? this.cornerRadius ?? 0 : 0;
-      },
-    },
-    topRightRadius: {
-      get(this: FigmaNode) {
-        if ("rectangleCornerRadii" in this) {
-          return this.rectangleCornerRadii?.[1] ?? 0;
-        }
-        return "cornerRadius" in this ? this.cornerRadius ?? 0 : 0;
-      },
-    },
-    bottomRightRadius: {
-      get(this: FigmaNode) {
-        if ("rectangleCornerRadii" in this) {
-          return this.rectangleCornerRadii?.[2] ?? 0;
-        }
-        return "cornerRadius" in this ? this.cornerRadius ?? 0 : 0;
-      },
-    },
-    bottomLeftRadius: {
-      get(this: FigmaNode) {
-        if ("rectangleCornerRadii" in this) {
-          return this.rectangleCornerRadii?.[3] ?? 0;
-        }
-        return "cornerRadius" in this ? this.cornerRadius ?? 0 : 0;
-      },
-    },
-  }) as FigmaNode;
-
-  // 递归处理子节点
-  if ("children" in extendedNode && extendedNode.children) {
-    extendedNode.children = extendedNode.children.map((child) => {
-      const res = wrapNode(child);
-      res.parent = extendedNode;
-      return res;
-    });
+class FigmaCore {
+  private fileKey!: string;
+  private nodeId!: string;
+  private auth!: InstanceType<typeof SingleFigmaAuth>;
+  private total!: number;
+  private current!: number;
+  constructor(options?: FigmaParserOptions) {
+    this.auth = new SingleFigmaAuth(options);
+  }
+  public async parse(url: string, options?: ParseOptions) {
+    await this.auth.checkAuthorize();
+    this.resetProgress();
+    const { html, css } = await this.transform(url, options);
+    return htmlTemplate(html, css);
+  }
+  public async parseBatch(urls: string[], options?: ParseOptions) {
+    await this.auth.checkAuthorize();
+    this.resetProgress();
+    const result = await Promise.all(
+      urls.map((url) => this.transform(url, options))
+    );
+    return result.map(({ html, css }) => htmlTemplate(html, css));
   }
 
-  return extendedNode;
+  private async transform(url: string, options?: ParseOptions) {
+    const { fileKey, nodeId } = pickParams(url);
+    this.fileKey = fileKey;
+    this.nodeId = nodeId;
+    const file = (await getFigmaNodes({
+      fileKey: this.fileKey,
+      nodeId: this.nodeId,
+    })) as GetFileNodesResponse;
+    const figmaDocument = Object.values(file.nodes)[0].document;
+    const rootNode = wrapNode(figmaDocument);
+    const images = {};
+    this.total += calculateNodeNumber(rootNode);
+    const { html, css } = await parseNode(rootNode, images, true, () => {
+      this.current++;
+      options?.onProgress?.(this.current / this.current);
+    });
+    const previewHtml = replaceSrcIdentifiers(html, images, true);
+    return { html: previewHtml, css };
+  }
+
+  public async transformNodeToBase64(nodeId: string, format: "png" | "svg") {
+    const response = await getFigmaImages({
+      nodeId: nodeId ?? this.nodeId,
+      fileKey: this.fileKey,
+      format,
+    });
+    const imageUrl = response.images[nodeId];
+    if (!imageUrl) return null;
+    const base64 = await this.getBase64ByImageUrl(imageUrl);
+    return base64 && this.formatBase64(base64, format);
+  }
+  private async getBase64ByImageUrl(imageUrl: string) {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  }
+  private formatBase64(base64: string, format: "png" | "svg") {
+    if (format === "png") {
+      return base64.startsWith("data:image/png;base64,")
+        ? base64
+        : `data:image/png;base64,${base64}`;
+    }
+    return base64.startsWith("data:image/svg+xml;base64,")
+      ? base64
+      : `data:image/svg+xml;base64,${base64}`;
+  }
+
+  public async getBase64ByImageRef(imageRef: string) {
+    const response = await getBase64ByImageRef({ imageRef });
+    const data = await response.json();
+    const base64 = data.images[imageRef];
+    return base64 && this.formatBase64(base64, "png");
+  }
+  private resetProgress() {
+    this.total = 0;
+    this.current = 0;
+  }
 }
 
-function calculateGradientTransform(
-  gradientHandlePositions: { x: number; y: number }[]
-): number[][] {
-  // 实现根据 gradientHandlePositions 计算矩阵
-  // 这里需要根据具体需求计算，这里提供一个示例
-  const [handle1, handle2] = gradientHandlePositions;
-  // 示例转换，实际需根据 Figma 的 gradient 转换逻辑实现
-  return [
-    [handle2.x - handle1.x, 0, handle1.x],
-    [0, handle2.y - handle1.y, handle1.y],
-  ];
-}
+const FigmaParser = singleton(FigmaCore);
 
-function replaceSrcIdentifiers(
-  html: string,
-  images: { [key: string]: string },
-  useBase64: boolean
-): string {
-  return html.replace(/__SRC__(.*?)__/g, (_, imageName) => {
-    const src = useBase64
-      ? images[imageName.replace(/\s+/g, "_")]
-      : `images/${imageName.replace(/\s+/g, "_")}`;
-    return src;
-  });
-}
-
-function htmlTemplate(html: string, css: string) {
-  return `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Figma Designer</title>
-    <style>${css}</style>
-  </head>
-  <body>
-    ${html}
-  </body>
-</html>
-`;
-}
-
-let totalNodes = 0;
-let count = 0;
-
-const generateByUrl = async (
-  url: string,
-  onProgress?: (progress: number) => void
-) => {
-  const figmaCore = new SingleFigmaCore();
-  figmaCore.setUrl(url);
-  const figmaData = await figmaCore.getFigmaNodes();
-  const figmaDocument = Object.values(figmaData.nodes)[0].document;
-  const rootNode = wrapNode(figmaDocument);
-  const images = {};
-  totalNodes += calculateNodeNumber(rootNode);
-  const { html, css } = await parseNode(rootNode, images, true, () => {
-    count++;
-    onProgress?.(count / totalNodes);
-  });
-  const previewHtml = replaceSrcIdentifiers(html, images, true);
-  return { html: previewHtml, css };
-};
-
-export const transformFigmaToHtml = async (
-  url: string,
-  onProgress?: (progress: number) => void
-) => {
-  totalNodes = 0;
-  count = 0;
-  await checkAuthorize();
-  const { html, css } = await generateByUrl(url, onProgress);
-  return htmlTemplate(html, css);
-};
-
-export const transformFigmaToHtmlBatch = async (
-  urls: string[],
-  onProgress?: (progress: number) => void
-) => {
-  totalNodes = 0;
-  count = 0;
-  await checkAuthorize();
-  const result = await Promise.all(
-    urls.map((url) => generateByUrl(url, onProgress))
-  );
-  return result.map(({ html, css }) => htmlTemplate(html, css));
-};
+export { FigmaParser };

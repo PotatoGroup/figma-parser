@@ -1,5 +1,5 @@
 import type { EllipseNode } from "@figma/rest-api-spec";
-import { SingleFigmaCore } from "@/core/core";
+import { FigmaParser } from "@/core";
 import type { IExtendedFigmaNode } from "@/types";
 import {
   colorToCss,
@@ -15,7 +15,7 @@ export const parseEllipseNode = async (
   images: { [key: string]: string },
   isTopLevel = false
 ): Promise<{ html: string; css: string }> => {
-  const figmaCore = new SingleFigmaCore();
+  const figmaParser = new FigmaParser();
   const containerClassName = generateClassName("ellipse");
   const { name } = node;
 
@@ -36,7 +36,7 @@ export const parseEllipseNode = async (
   }
 
   if (fills[0]?.type === "IMAGE") {
-    const base64 = await figmaCore.getBase64ByImageRef(fills[0].imageRef);
+    const base64 = await figmaParser.getBase64ByImageRef(fills[0].imageRef);
     const imageName = `${sanitizeName(name)}_${uuid()}.png`;
     images[imageName] = base64;
     const srcIdentifier = `__SRC__${imageName}__`;

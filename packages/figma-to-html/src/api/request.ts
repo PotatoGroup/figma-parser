@@ -1,5 +1,6 @@
-import { refreshToken, reauth, getToken } from "@/oAuth";
+import { getToken, SingleFigmaAuth } from "@/oAuth";
 export const request = async (url: string, options?: RequestInit) => {
+  const auth = new SingleFigmaAuth();
   const { headers, ...rest } = options ?? {};
   const doFetch = async () => {
     const access_token = getToken().access_token;
@@ -13,11 +14,11 @@ export const request = async (url: string, options?: RequestInit) => {
   };
   let response = await doFetch();
   if (response.status === 403) {
-    await refreshToken();
+    await auth.refreshToken();
     response = await doFetch();
   }
   if (response.status === 404) {
-    reauth();
+    auth.reauth();
     throw new Error("No access permission");
   }
   return response;
