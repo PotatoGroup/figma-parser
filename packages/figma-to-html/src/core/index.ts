@@ -113,6 +113,6 @@ class FigmaCore {
   }
 }
 
-const FigmaParser = singleton(FigmaCore);
+const FigmaParser = singleton<FigmaParserOptions>(FigmaCore);
 
 export { FigmaParser };

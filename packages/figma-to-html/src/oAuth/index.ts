@@ -70,6 +70,9 @@ class FigmaAuth {
     });
   }
   public async checkAuthorize() {
+    if (!this.clientId || !this.clientSecret) {
+      throw new Error("clientId or clientSecret is required");
+    }
     const url = new URL(window.location.href);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
@@ -111,6 +114,6 @@ class FigmaAuth {
   }
 }
 
-const SingleFigmaAuth = singleton(FigmaAuth);
+const SingleFigmaAuth = singleton<FigmaAuthOptions>(FigmaAuth);
 
 export { SingleFigmaAuth };

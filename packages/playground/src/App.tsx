@@ -23,7 +23,7 @@ function App() {
           setProgress(Math.floor(process));
         },
       })
-      .then((res) => {
+      .then((res: string | string[]) => {
         setResult(res);
         console.timeEnd("transformFigmaToHtml");
       });
@@ -44,7 +44,7 @@ function App() {
           },
         }
       )
-      .then((res) => {
+      .then((res: string | string[]) => {
         setResult(res);
         console.timeEnd("transformFigmaToHtml");
       });
@@ -70,7 +70,7 @@ function App() {
       <button onClick={generateBatch}>generateBatch</button>
       <div
         style={{
-          color: "red",
+          color: "green",
           fontSize: "16px",
           fontWeight: "bold",
           padding: 24,
@@ -81,13 +81,12 @@ function App() {
       </div>
       <div
         style={{
-          display: "flex",
+          display: progress === 100 ? "flex" : "none",
           flexDirection: "column",
           gap: 16,
-          visibility: progress === 100 ? "visible" : "hidden",
         }}
       >
-        <h3>生成结果</h3>
+        <h3>----- 生成结果 -----</h3>
         {renderResult(result)}
       </div>
     </div>
