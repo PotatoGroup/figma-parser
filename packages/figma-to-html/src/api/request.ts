@@ -4,7 +4,8 @@ const cacheMap = new Map<string, Response>();
 export const request = async (url: string, options?: RequestInit) => {
   const auth = new SingleFigmaAuth();
   if (cacheMap.has(url)) {
-    return cacheMap.get(url) as Response;
+    const response = cacheMap.get(url)?.clone() as Response;
+    return response;
   }
   const { headers, ...rest } = options ?? {};
   const doFetch = async () => {
@@ -26,6 +27,6 @@ export const request = async (url: string, options?: RequestInit) => {
     auth.reauth();
     throw new Error("No access permission");
   }
-  cacheMap.set(url, response.clone());
+  cacheMap.set(url, response);
   return response;
 };
