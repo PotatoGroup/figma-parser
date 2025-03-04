@@ -26,6 +26,8 @@ export type ParseOptions = Partial<{
   onProgress: (progress: number) => void;
 }>;
 
+const errorImage = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAAwCAYAAABAIGlOAAAAAXNSR0IArs4c6QAAAjZJREFUaEPtmFFygzAMRHEu1uYOges0uU7IHUJPplZMnNFQkNYgJ57i/OQHbD2t1pYIzU5+YSecTQX9b0pXRXer6Ol0+iwJ/na7DSnxQKXbtu29aZqiQBkyhHC5Xq9nBBgFJWSxVz+TGzSpZDLBj9WVFbTve6gKMgE2fFaEENhKFXQuyZA6bds+PVoVzVWrk3Vr6RqJrqUrE1Q9qpQLeym1TUNsXpRHYzApFzoCyc8UBSp7YyI6eipbDKgMJKrkefcWAzo36XiW8AP0i6eplHVdr5eu685ExEH8+aUEhfg1zseoLVxB5TXkCSuHfhRsur8bKDqco4eTLNGZpA0hhG906B4nHaRMrIZh7gBS1h36vj9q+6JJ+/XpQEQXRGUX0ITARr4lvyYm7JkrxP+bQT2DMxLGXzYWv1tZltgMah1AWolKJbQTW97Dyn6qJTaBasEh3pegKICmuqbqatC1JSsTEAOzEjZRVPv0uqjqatDUA2hOYRRUKmVYxRfUQ00Gj0pZSYugyL5LffUqRa3AEH+mgPJ9yXevVeJyzc2dER8gS/0sCjidaoDEvR40FUZ7HvVobDKABPt51BM0Xi+I95B9tQ4p2aPIhugzk3tUvTa4ied1NVW1Af+toLLv1VRFlLf63beDxhOVoZVTVT2MLEh4TEOOdbRc555De17rXbWv3hJgzneB5MKzKKxoTiBtbfbt4XAYRzMi+nj8X/gfGbbl2pBH3wXquW8F9cxmCWtVRUtQwTOGHz4GEE9rpxzOAAAAAElFTkSuQmCC`;
+
 class FigmaCore {
   private auth!: InstanceType<typeof SingleFigmaAuth>;
   private fileKey!: string;
@@ -57,7 +59,7 @@ class FigmaCore {
       urls.map((url) => this.transform(url, options))
     );
     return result.map(({ html, css }) =>
-      this.options.tpl ? htmlTemplate(html, css) : ({ html, css })
+      this.options.tpl ? htmlTemplate(html, css) : { html, css }
     );
   }
 
@@ -88,7 +90,7 @@ class FigmaCore {
       format,
     });
     const imageUrl = response.images?.[nodeId];
-    if (!imageUrl) return null;
+    if (!imageUrl) return errorImage;
     const base64 = await this.getBase64ByImageUrl(imageUrl);
     return base64 && this.formatBase64(base64, format);
   }

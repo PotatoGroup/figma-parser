@@ -46,14 +46,11 @@ export const parseToSVG = async (
     const detail = borderStyles.borderDetail;
     const extraWidth = (detail.left?.width || 0) + (detail.right?.width || 0);
     const extraHeight = (detail.top?.width || 0) + (detail.bottom?.width || 0);
-
-    if (!isNaN(parseFloat(imageStyles.width))) {
-      imageStyles.width = `${parseFloat(imageStyles.width) + extraWidth}px`;
-    }
-    if (!isNaN(parseFloat(imageStyles.height))) {
-      imageStyles.height = `${parseFloat(imageStyles.height) + extraHeight}px`;
-    }
+    imageStyles.width = imageStyles.width + extraWidth;
+    imageStyles.height = imageStyles.height + extraHeight;
   }
+  imageStyles.width = imageStyles.width + "px";
+  imageStyles.height = imageStyles.height + "px";
   const css = generateCSS(imageStyles, imageClassName);
 
   const html = `<img src="${srcIdentifier}" class="${imageClassName}" />`;
