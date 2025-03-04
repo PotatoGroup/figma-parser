@@ -87,7 +87,7 @@ class FigmaCore {
       fileKey: this.fileKey,
       format,
     });
-    const imageUrl = response.images[nodeId];
+    const imageUrl = response.images?.[nodeId];
     if (!imageUrl) return null;
     const base64 = await this.getBase64ByImageUrl(imageUrl);
     return base64 && this.formatBase64(base64, format);
@@ -115,7 +115,7 @@ class FigmaCore {
   public async getBase64ByImageRef(imageRef: string) {
     const response = await getBase64ByImageRef({ imageRef });
     const data = await response.json();
-    const base64 = data.images[imageRef];
+    const base64 = data.images?.[imageRef];
     return base64 && this.formatBase64(base64, "png");
   }
   private resetProgress() {

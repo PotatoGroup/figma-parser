@@ -34,9 +34,11 @@ function App() {
     figmaParser
       .parseBatch(
         [
-          "https://www.figma.com/design/RIXZ57M73YaV4qONoDrtbh/UI-潮流服饰频道?node-id=441-2955&t=FEgDqVhDLwsoBiRN-4",
-          "https://www.figma.com/design/RIXZ57M73YaV4qONoDrtbh/UI-%E6%BD%AE%E6%B5%81%E6%9C%8D%E9%A5%B0%E9%A2%91%E9%81%93?node-id=441-2050&t=GqlTVz6XCSUMEcfv-4",
-          "https://www.figma.com/design/RIXZ57M73YaV4qONoDrtbh/UI-%E6%BD%AE%E6%B5%81%E6%9C%8D%E9%A5%B0%E9%A2%91%E9%81%93?node-id=276-3506&t=GqlTVz6XCSUMEcfv-4",
+          "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=36-15405&t=fbKNknstAWIskNOm-4",
+          "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=30-11247&t=6YXb8fdqDYb9u3NE-4",
+          "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=36-30234&t=6YXb8fdqDYb9u3NE-4",
+          "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=29-11148&t=6YXb8fdqDYb9u3NE-4",
+          "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=28-8970&t=6YXb8fdqDYb9u3NE-4"
         ],
         {
           onProgress: (process: number) => {
