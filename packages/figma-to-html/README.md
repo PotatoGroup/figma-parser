@@ -47,6 +47,7 @@ figmaParser
 | clientId     | `string`                     | -                                   | ✅       | figma clientId     |
 | clientSecret | `string`                     | -                                   | ✅       | figma clientSecret |
 | redirectUri  | `string`                     | location.origin + location.pathname |          | figma redirectUri  |
+| tpl          | `boolean`                    | true                                |          | template           |
 | onProgress   | `(progress: number) => void` | -                                   |          | progress callback  |
 
 ## LICENSE
