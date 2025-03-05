@@ -97,7 +97,11 @@ class FigmaAuth {
         ["refresh_token"]: refresh_token,
       }).toString(),
     });
-
+    if (response.status === 400) {
+      console.error("[refresh token expired]");
+      this.reauth()
+      return;
+    }
     const data = await response.json();
     if (data.error) {
       throw new Error(data.message || "refresh token failed");
