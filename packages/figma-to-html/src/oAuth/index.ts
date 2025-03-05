@@ -118,6 +118,6 @@ class FigmaAuth {
   }
 }
 
-const SingleFigmaAuth = singleton<FigmaAuthOptions>(FigmaAuth);
+const SingleFigmaAuth = singleton<FigmaAuthOptions, FigmaAuth>(FigmaAuth);
 
 export { SingleFigmaAuth };

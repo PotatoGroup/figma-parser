@@ -1,4 +1,4 @@
-export type Constructor<T = any, P = any> = new (options?: P) => T;
+export type Constructor<P = any, T = any> = new (options?: P) => T;
 
 export type InstanceType<T extends Constructor<any>> = T extends new (
   ...args: any[]
@@ -6,9 +6,9 @@ export type InstanceType<T extends Constructor<any>> = T extends new (
   ? R
   : never;
 
-export const singleton = <T extends Object>(
-  ClassConstructor: Constructor<any, T>
-): Constructor<any, T> => {
+export const singleton = <P, T extends Object>(
+  ClassConstructor: Constructor<P, T>
+): Constructor<P, T> => {
   let ins: InstanceType<typeof ClassConstructor>;
   return new Proxy(ClassConstructor, {
     construct(target, arg) {

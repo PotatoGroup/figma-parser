@@ -40,6 +40,9 @@ class FigmaCore {
     this.auth = new SingleFigmaAuth(options);
     this.options = Object.assign({ tpl: true }, options);
   }
+  public get checkAuthorize() {
+    return this.auth.checkAuthorize.bind(this.auth);
+  }
   public async parse(url: string, options?: ParseOptions) {
     await this.auth.checkAuthorize();
     this.resetProgress();
@@ -126,6 +129,6 @@ class FigmaCore {
   }
 }
 
-const FigmaParser = singleton<FigmaParserOptions>(FigmaCore);
+const FigmaParser = singleton<FigmaParserOptions, FigmaCore>(FigmaCore);
 
 export { FigmaParser };
