@@ -10,6 +10,7 @@ import {
 import { getFigmaNodes, getFigmaImages, getBase64ByImageRef } from "@/api";
 import type { GetFileNodesResponse } from "@figma/rest-api-spec";
 import { SingleFigmaAuth, type FigmaAuthOptions } from "@/oAuth";
+import { type ImageType } from "@/types";
 
 const pickParams = (url: string) => {
   const urlObject = new URL(url);
@@ -24,7 +25,7 @@ const pickParams = (url: string) => {
 export type FigmaParserOptions = FigmaAuthOptions & {
   tpl?: boolean;
   placeholderImage?: string;
-  imageResolver?: (url: string) => Promise<string>;
+  imageResolver?: (url: string, type: ImageType) => Promise<string>;
 };
 
 export type ParseOptions = Partial<{
@@ -89,7 +90,7 @@ class FigmaCore {
     return { html: previewHtml, css };
   }
 
-  public async resolveImageNode(nodeId: string, format: "png" | "svg") {
+  public async resolveImageNode(nodeId: string, format: ImageType) {
     const response = await getFigmaImages({
       nodeId: nodeId ?? this.nodeId,
       fileKey: this.fileKey,
@@ -101,7 +102,7 @@ class FigmaCore {
       this.options.imageResolver || this.getBase64ByImageUrl;
     return imageResolver.call(this, imageUrl, format);
   }
-  private async getBase64ByImageUrl(imageUrl: string, format: "png" | "svg") {
+  private async getBase64ByImageUrl(imageUrl: string, format: ImageType) {
     const response = await fetch(imageUrl);
     const blob = await response.blob();
     return new Promise<string>((resolve) => {

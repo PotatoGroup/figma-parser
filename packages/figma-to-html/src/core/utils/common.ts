@@ -1,5 +1,5 @@
 import type { RGB, Node, TypeStyle } from "@figma/rest-api-spec";
-import type { FigmaNode } from "@/types";
+import type { FigmaNode, ImageType } from "@/types";
 import { parseBackgroundStyle } from "@/core/style-parser/backgroundStyleParser";
 import { parseBorderStyle } from "@/core/style-parser/borderStyleParser";
 import { parseColorStyle } from "@/core/style-parser/colorStyleParser";
@@ -383,7 +383,7 @@ export function htmlTemplate(html: string, css: string) {
 `;
 }
 
-export function formatBase64(base64: string, format: "png" | "svg") {
+export function formatBase64(base64: string, format: ImageType) {
   if (format === "png") {
     return base64.startsWith("data:image/png;base64,")
       ? base64

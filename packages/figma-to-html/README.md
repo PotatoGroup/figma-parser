@@ -42,15 +42,15 @@ figmaParser
 
 ## Options
 
-| Option           | Type                               | Default                             | Required | Description           |
-| ---------------- | ---------------------------------- | ----------------------------------- | -------- | --------------------- |
-| clientId         | `string`                           | -                                   | ✅       | figma clientId        |
-| clientSecret     | `string`                           | -                                   | ✅       | figma clientSecret    |
-| redirectUri      | `string`                           | location.origin + location.pathname |          | figma redirectUri     |
-| tpl              | `boolean`                          | true                                |          | template              |
-| placeholderImage | `string`                           | -                                   |          | placeholder image url |
-| imageResolver    | `(url: string) => Promise<string>` | base64 image resolver               |          | image resolver        |
-| onProgress       | `(progress: number) => void`       | -                                   |          | progress callback     |
+| Option           | Type                                                | Default                             | Required | Description           |
+| ---------------- | --------------------------------------------------- | ----------------------------------- | -------- | --------------------- |
+| clientId         | `string`                                            | -                                   | ✅       | figma clientId        |
+| clientSecret     | `string`                                            | -                                   | ✅       | figma clientSecret    |
+| redirectUri      | `string`                                            | location.origin + location.pathname |          | figma redirectUri     |
+| tpl              | `boolean`                                           | true                                |          | template              |
+| placeholderImage | `string`                                            | -                                   |          | placeholder image url |
+| imageResolver    | `(url: string, type: ImageType) => Promise<string>` | base64 image resolver               |          | image resolver        |
+| onProgress       | `(progress: number) => void`                        | -                                   |          | progress callback     |
 
 ## LICENSE
 
