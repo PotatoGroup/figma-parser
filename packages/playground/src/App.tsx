@@ -2,6 +2,8 @@ import { FigmaParser } from "figma-to-html";
 import "./App.css";
 import { useCallback, useState } from "react";
 
+const errorImage = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADoAAAAwCAYAAABAIGlOAAAAAXNSR0IArs4c6QAAAjZJREFUaEPtmFFygzAMRHEu1uYOges0uU7IHUJPplZMnNFQkNYgJ57i/OQHbD2t1pYIzU5+YSecTQX9b0pXRXer6Ol0+iwJ/na7DSnxQKXbtu29aZqiQBkyhHC5Xq9nBBgFJWSxVz+TGzSpZDLBj9WVFbTve6gKMgE2fFaEENhKFXQuyZA6bds+PVoVzVWrk3Vr6RqJrqUrE1Q9qpQLeym1TUNsXpRHYzApFzoCyc8UBSp7YyI6eipbDKgMJKrkefcWAzo36XiW8AP0i6eplHVdr5eu685ExEH8+aUEhfg1zseoLVxB5TXkCSuHfhRsur8bKDqco4eTLNGZpA0hhG906B4nHaRMrIZh7gBS1h36vj9q+6JJ+/XpQEQXRGUX0ITARr4lvyYm7JkrxP+bQT2DMxLGXzYWv1tZltgMah1AWolKJbQTW97Dyn6qJTaBasEh3pegKICmuqbqatC1JSsTEAOzEjZRVPv0uqjqatDUA2hOYRRUKmVYxRfUQ00Gj0pZSYugyL5LffUqRa3AEH+mgPJ9yXevVeJyzc2dER8gS/0sCjidaoDEvR40FUZ7HvVobDKABPt51BM0Xi+I95B9tQ4p2aPIhugzk3tUvTa4ied1NVW1Af+toLLv1VRFlLf63beDxhOVoZVTVT2MLEh4TEOOdbRc555De17rXbWv3hJgzneB5MKzKKxoTiBtbfbt4XAYRzMi+nj8X/gfGbbl2pBH3wXquW8F9cxmCWtVRUtQwTOGHz4GEE9rpxzOAAAAAElFTkSuQmCC`;
+
 const figmaParser = new FigmaParser({
   clientId: "cJvW5Of2z1fahRyeR2xp9T",
   clientSecret: "OiGpuQXKIcm9OOHXE1BlzujTxUPER1",
@@ -38,7 +40,7 @@ function App() {
           "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=30-11247&t=6YXb8fdqDYb9u3NE-4",
           "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=36-30234&t=6YXb8fdqDYb9u3NE-4",
           "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=29-11148&t=6YXb8fdqDYb9u3NE-4",
-          "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=28-8970&t=6YXb8fdqDYb9u3NE-4"
+          "https://www.figma.com/design/wdSooKUtOwOJuDulR1L6nt/组织管理?node-id=28-8970&t=6YXb8fdqDYb9u3NE-4",
         ],
         {
           onProgress: (process: number) => {

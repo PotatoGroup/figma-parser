@@ -17,12 +17,12 @@ export const parseToSVG = async (
   isTopLevel = false
 ): Promise<{ html: string; css: string }> => {
   const figmaParser = new FigmaParser();
-  const base64 = await figmaParser.transformNodeToBase64(node.id, "svg");
-  if (!base64) return { html: "", css: "" };
+  const image = await figmaParser.resolveImageNode(node.id, "svg");
+  if (!image) return { html: "", css: "" };
 
   const imageClassName = generateClassName("svg-img");
   const imageName = `${sanitizeName(node.name)}_${uuid()}.svg`;
-  images[imageName] = base64;
+  images[imageName] = image;
   const srcIdentifier = `__SRC__${imageName}__`;
 
   const imageStyles: { [key: string]: string } = Object.assign(

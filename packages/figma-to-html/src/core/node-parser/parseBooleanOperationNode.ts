@@ -19,16 +19,16 @@ export const parseBooleanOperationNode = async (
   const imageClassName = generateClassName("boolean-operation-img");
   const { name } = node;
 
-  let base64;
+  let image;
   try {
-    base64 = await figmaParser.transformNodeToBase64(node.id, "svg");
+    image = await figmaParser.resolveImageNode(node.id, "svg");
   } catch (error) {
     return { html: "", css: "" };
   }
-  if (!base64) return { html: "", css: "" };
+  if (!image) return { html: "", css: "" };
 
   const imageName = `${sanitizeName(name)}_${uuid()}.svg`;
-  images[imageName] = base64;
+  images[imageName] = image;
   const srcIdentifier = `__SRC__${imageName}__`;
 
   // Add styles for the container and image

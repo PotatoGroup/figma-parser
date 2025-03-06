@@ -107,15 +107,12 @@ export function roundToHalf(value: number): number {
 
 export function replaceSrcIdentifiers(
   html: string,
-  images: { [key: string]: string },
-  useBase64: boolean
+  images: { [key: string]: string }
 ): string {
-  return html.replace(/__SRC__(.*?)__/g, (_, imageName) => {
-    const src = useBase64
-      ? images[imageName.replace(/\s+/g, "_")]
-      : `images/${imageName.replace(/\s+/g, "_")}`;
-    return src;
-  });
+  return html.replace(
+    /__SRC__(.*?)__/g,
+    (_, imageName) => images[imageName.replace(/\s+/g, "_")]
+  );
 }
 
 function calculateGradientTransform(
@@ -384,4 +381,15 @@ export function htmlTemplate(html: string, css: string) {
   </body>
 </html>
 `;
+}
+
+export function formatBase64(base64: string, format: "png" | "svg") {
+  if (format === "png") {
+    return base64.startsWith("data:image/png;base64,")
+      ? base64
+      : `data:image/png;base64,${base64}`;
+  }
+  return base64.startsWith("data:image/svg+xml;base64,")
+    ? base64
+    : `data:image/svg+xml;base64,${base64}`;
 }
