@@ -91,12 +91,14 @@ class FigmaCore {
   }
 
   public async resolveImageNode(nodeId: string, format: ImageType) {
+    nodeId = nodeId ?? this.nodeId;
     const response = await getFigmaImages({
-      nodeId: nodeId ?? this.nodeId,
+      nodeId,
       fileKey: this.fileKey,
       format,
     });
-    const imageUrl = response.images?.[nodeId];
+    const resId = nodeId.includes("-") ? nodeId.split("-").join(":") : nodeId;
+    const imageUrl = response.images?.[resId];
     if (!imageUrl) return this.options.placeholderImage;
     const imageResolver =
       this.options.imageResolver || this.getBase64ByImageUrl;
@@ -124,6 +126,9 @@ class FigmaCore {
   private resetProgress() {
     this.total = 0;
     this.current = 0;
+  }
+  public get parseToImage() {
+    return this.resolveImageNode.bind(this, this.nodeId, "png");
   }
 }
 
