@@ -12,16 +12,6 @@ import type { GetFileNodesResponse } from "@figma/rest-api-spec";
 import { SingleFigmaAuth, type FigmaAuthOptions } from "@/oAuth";
 import { type ImageType } from "@/types";
 
-const pickParams = (url: string) => {
-  const urlObject = new URL(url);
-  const fileKey = urlObject.pathname.split("/")[2];
-  const nodeId = urlObject.searchParams.get("node-id") as string;
-  return {
-    fileKey,
-    nodeId,
-  };
-};
-
 export type FigmaParserOptions = FigmaAuthOptions & {
   tpl?: boolean;
   placeholderImage?: string;
@@ -44,8 +34,33 @@ class FigmaCore {
     this.auth = new SingleFigmaAuth(options);
     this.options = Object.assign({ tpl: true }, options);
   }
-  public get checkAuthorize() {
-    return this.auth.checkAuthorize.bind(this.auth);
+  private pickParams(url: string) {
+    const urlObject = new URL(url);
+    const fileKey = urlObject.pathname.split("/")[2];
+    const nodeId = urlObject.searchParams.get("node-id") as string;
+    this.nodeId = nodeId;
+    this.fileKey = fileKey;
+  }
+  private resetProgress() {
+    this.total = 0;
+    this.current = 0;
+  }
+  private async transform(url: string, options?: ParseOptions) {
+    this.pickParams(url);
+    const file = (await getFigmaNodes({
+      fileKey: this.fileKey,
+      nodeId: this.nodeId,
+    })) as GetFileNodesResponse;
+    const figmaDocument = Object.values(file.nodes)[0].document;
+    const rootNode = wrapNode(figmaDocument);
+    const images = {};
+    this.total += calculateNodeNumber(rootNode);
+    const { html, css } = await parseNode(rootNode, images, true, () => {
+      this.current++;
+      options?.onProgress?.(Math.floor((this.current / this.total) * 100));
+    });
+    const previewHtml = replaceSrcIdentifiers(html, images);
+    return { html: previewHtml, css };
   }
   public async parse(url: string, options?: ParseOptions) {
     await this.auth.checkAuthorize();
@@ -69,27 +84,6 @@ class FigmaCore {
       this.options.tpl ? htmlTemplate(html, css) : { html, css }
     );
   }
-
-  private async transform(url: string, options?: ParseOptions) {
-    const { fileKey, nodeId } = pickParams(url);
-    this.fileKey = fileKey;
-    this.nodeId = nodeId;
-    const file = (await getFigmaNodes({
-      fileKey: this.fileKey,
-      nodeId: this.nodeId,
-    })) as GetFileNodesResponse;
-    const figmaDocument = Object.values(file.nodes)[0].document;
-    const rootNode = wrapNode(figmaDocument);
-    const images = {};
-    this.total += calculateNodeNumber(rootNode);
-    const { html, css } = await parseNode(rootNode, images, true, () => {
-      this.current++;
-      options?.onProgress?.(Math.floor((this.current / this.total) * 100));
-    });
-    const previewHtml = replaceSrcIdentifiers(html, images);
-    return { html: previewHtml, css };
-  }
-
   public async resolveImageNode(nodeId: string, format: ImageType) {
     nodeId = nodeId ?? this.nodeId;
     const response = await getFigmaImages({
@@ -116,19 +110,19 @@ class FigmaCore {
       reader.readAsDataURL(blob);
     });
   }
-
   public async getBase64ByImageRef(imageRef: string) {
     const response = await getBase64ByImageRef({ imageRef });
     const data = await response.json();
     const base64 = data.images?.[imageRef];
     return base64 && formatBase64(base64, "png");
   }
-  private resetProgress() {
-    this.total = 0;
-    this.current = 0;
+  public async parseToImage(url: string) {
+    await this.auth.checkAuthorize();
+    this.pickParams(url);
+    return this.resolveImageNode.call(this, this.nodeId, "png");
   }
-  public get parseToImage() {
-    return this.resolveImageNode.bind(this, this.nodeId, "png");
+  public get checkAuthorize() {
+    return this.auth.checkAuthorize.bind(this.auth);
   }
 }
 

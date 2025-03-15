@@ -28,13 +28,13 @@ function App() {
       .then((res: string | string[]) => {
         setResult(res);
         console.timeEnd("transformFigmaToHtml");
-        figmaParser.parseToImage().then((res) => {
-          const a = document.createElement("a");
-          a.href = res as string;
-          a.download = "image.png";
-          a.click();
-        });
       });
+    figmaParser.parseToImage(address).then((res) => {
+      const a = document.createElement("a");
+      a.href = res as string;
+      a.download = "image.png";
+      a.click();
+    });
   }, [address]);
 
   const generateBatch = useCallback(async () => {

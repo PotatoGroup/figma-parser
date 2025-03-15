@@ -38,6 +38,16 @@ figmaParser
   .catch((error) => {
     console.log(error);
   });
+
+//image
+figmaParser
+  .parseToImage(url)
+  .then((imageUrl) => {
+    console.log(imageUrl);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 ```
 
 ## Options
